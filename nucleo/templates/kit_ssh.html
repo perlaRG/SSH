@@ -1,0 +1,326 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KIT EDUCATIVO: SSH y Autenticación Segura</title>
+  <!-- Enlace opcional a CSS separado (descomentar si usa archivo estático) -->
+  <!-- <link rel="stylesheet" href="{% static 'nucleo/css/kit_ssh.css' %}"> -->
+
+  <style>
+    /* ---------- Variables y reset ligero ---------- */
+    :root{
+      --bg:#f7fafc;
+      --card:#ffffff;
+      --primary:#0f172a;
+      --accent:#0ea5a4;
+      --muted:#6b7280;
+      --radius:12px;
+      --max-width:1100px;
+      --gap:1rem;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--primary);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      padding:2rem 1rem;
+      display:flex;
+      justify-content:center;
+    }
+
+    .container{
+      width:100%;
+      max-width:var(--max-width);
+    }
+
+    header{display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.25rem}
+    .title{
+      background:linear-gradient(90deg,var(--accent),#38bdf8 120%);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+      font-weight:700;font-size:1.4rem
+    }
+    .subtitle{font-size:.95rem;color:var(--muted)}
+
+    main{display:grid;grid-template-columns:1fr;gap:var(--gap);align-items:start}
+
+    /* Infografía */
+    .infographic-card{
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:1rem;
+      box-shadow:0 6px 18px rgba(2,6,23,0.06);
+      overflow:hidden;
+    }
+    .infographic-card img{
+      display:block;
+      width:100%;
+      max-width:100%;
+      height:auto; /* importante: mantener proporcionalidad */
+      border-radius:8px;
+      object-fit:contain;
+    }
+
+    /* Botones / Tarjetas de Materiales */
+    .materials{
+      display:flex;
+      gap:var(--gap);
+      margin-top:.75rem;
+      flex-wrap:wrap;
+    }
+    .card-link{
+      display:flex;align-items:center;gap:.75rem;
+      background:linear-gradient(180deg, #fff, #fbfdff);
+      padding:.85rem 1rem;border-radius:10px;border:1px solid rgba(15,23,42,0.04);
+      text-decoration:none;color:var(--primary);min-width:210px;flex:1 1 220px;
+      box-shadow:0 2px 8px rgba(2,6,23,0.03);
+    }
+    .card-link:hover{transform:translateY(-3px);transition:.18s ease}
+    .card-icon{width:42px;height:42px;border-radius:8px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;color:white;font-weight:700}
+    .card-text{display:flex;flex-direction:column}
+    .card-text .label{font-weight:600}
+    .card-text .desc{font-size:.85rem;color:var(--muted)}
+
+    /* Video responsivo 16:9 */
+    .video-wrapper{position:relative;width:100%;padding-bottom:56.25%;overflow:hidden;border-radius:10px}
+    .video-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:0}
+
+    /* Sección interactiva */
+    .exercise{background:linear-gradient(180deg, #fff, #fbfdff);padding:1rem;border-radius:var(--radius);border:1px solid rgba(2,6,23,0.04)}
+    .exercise h3{margin:0 0 .5rem 0}
+    .exercise pre{background:#0b1220;color:#dbeafe;padding:.75rem;border-radius:8px;overflow:auto;font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, 'Roboto Mono', monospace}
+
+    /* Estilos para Quiz */
+    .quiz-container{background:linear-gradient(180deg, #fff, #fbfdff);padding:1rem;border-radius:var(--radius);border:1px solid rgba(2,6,23,0.04)}
+    .quiz-container h3{margin:0 0 1rem 0;color:var(--primary)}
+    .quiz-question{margin-bottom:1.25rem;padding:.75rem;background:white;border-left:3px solid var(--accent);border-radius:6px}
+    .quiz-question p{margin:.25rem 0;font-weight:500;font-size:.95rem}
+    .quiz-options{margin:.5rem 0 0 0;display:flex;flex-direction:column;gap:.5rem}
+    .quiz-option{display:flex;align-items:center;gap:.5rem;cursor:pointer;padding:.5rem;border-radius:4px;transition:background .2s ease}
+    .quiz-option:hover{background:rgba(14,165,164,0.05)}
+    .quiz-option input[type="radio"]{cursor:pointer;flex-shrink:0}
+    .quiz-option label{cursor:pointer;flex:1;margin:0}
+    .quiz-feedback{margin-top:.5rem;padding:.5rem;border-radius:4px;font-size:.9rem;font-weight:500;display:none}
+    .quiz-feedback.correcta{background:#d1fae5;color:#065f46;border-left:3px solid #10b981;display:block}
+    .quiz-feedback.incorrecta{background:#fee2e2;color:#7f1d1d;border-left:3px solid #ef4444;display:block}
+    .quiz-btn{background:var(--accent);color:white;padding:.75rem 1.5rem;border:none;border-radius:6px;font-weight:600;cursor:pointer;font-size:.95rem;transition:all .2s ease;margin-top:1rem;width:100%}
+    .quiz-btn:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(14,165,164,0.3)}
+    .quiz-result{margin-top:1rem;padding:1rem;border-radius:6px;background:rgba(14,165,164,0.1);border:1px solid var(--accent);display:none;text-align:center;font-weight:600}
+    .quiz-result.show{display:block}
+
+    footer{margin-top:1rem;text-align:center;color:var(--muted);font-size:.9rem}
+
+    /* Responsive: en pantallas grandes mostramos layout en dos columnas */
+    @media(min-width:900px){
+      main{grid-template-columns: 1fr 420px;gap:1.25rem}
+      .materials{flex-direction:column}
+    }
+
+  </style>
+
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="title">KIT EDUCATIVO: SSH y Autenticación Segura</div>
+      <div class="subtitle">Guía práctica y recursos para entender y aplicar SSH de forma segura</div>
+    </header>
+
+    <main>
+      <!-- Columna principal: infografía, materiales y video -->
+      <section>
+        <div class="infographic-card">
+          <h2 style="margin-top:0;margin-bottom:.5rem;font-size:1rem">Infografía</h2>
+          <!-- Infografía: imagen desde static/img -->
+          <img src="{% static 'img/Infografía.png' %}" alt="Infografía SSH">
+
+          <div class="materials" style="margin-top:0.75rem">
+            <a class="card-link" href="{{ link_guia_pdf }}" target="_blank" rel="noopener noreferrer">
+              <div class="card-icon">PDF</div>
+              <div class="card-text">
+                <div class="label">Guía Técnica (Descargar)</div>
+                <div class="desc">Formato PDF con pasos y explicación detallada.</div>
+              </div>
+            </a>
+
+            <a class="card-link" href="{{ link_presentacion_slides }}" target="_blank" rel="noopener noreferrer">
+              <div class="card-icon">PPT</div>
+              <div class="card-text">
+                <div class="label">Presentación (Ver)</div>
+                <div class="desc">Slides sobre el uso seguro de SSH.</div>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div style="height:1rem"></div>
+
+        <div class="infographic-card">
+          <h2 style="margin-top:0;margin-bottom:.5rem;font-size:1rem">Video tutorial</h2>
+          <!-- Contenedor responsivo 16:9 -->
+          <div class="video-wrapper">
+            <!-- Video: usa la variable de contexto `url_video_embed` -->
+            <iframe src="{{ url_video_embed }}" title="Video tutorial SSH" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+          </div>
+          <p style="margin-top:.5rem;color:var(--muted);font-size:.9rem"></p>
+        </div>
+      </section>
+
+      <!-- Columna secundaria: Quiz Interactivo -->
+      <aside>
+        <div class="quiz-container">
+          <h3>📝 Repaso: SSH y Autenticación Segura</h3>
+          <form id="quizForm">
+            
+            <!-- Pregunta 1 -->
+            <div class="quiz-question">
+              <p><strong>1. ¿Cuál es la función principal de la Llave Privada en la autenticación SSH?</strong></p>
+              <div class="quiz-options">
+                <div class="quiz-option">
+                  <input type="radio" id="q1a" name="pregunta1" value="incorrecta">
+                  <label for="q1a">Se sube al servidor remoto</label>
+                </div>
+                <div class="quiz-option">
+                  <input type="radio" id="q1b" name="pregunta1" value="correcta">
+                  <label for="q1b">Identifica y prueba la identidad del usuario</label>
+                </div>
+                <div class="quiz-option">
+                  <input type="radio" id="q1c" name="pregunta1" value="incorrecta">
+                  <label for="q1c">Se utiliza para encriptar los datos del servidor</label>
+                </div>
+              </div>
+              <div class="quiz-feedback" id="feedback1"></div>
+            </div>
+
+            <!-- Pregunta 2 -->
+            <div class="quiz-question">
+              <p><strong>2. ¿Qué comando se utiliza para obtener el contenido de la Llave Pública?</strong></p>
+              <div class="quiz-options">
+                <div class="quiz-option">
+                  <input type="radio" id="q2a" name="pregunta2" value="incorrecta">
+                  <label for="q2a">ssh-keygen</label>
+                </div>
+                <div class="quiz-option">
+                  <input type="radio" id="q2b" name="pregunta2" value="incorrecta">
+                  <label for="q2b">ssh-copy-id</label>
+                </div>
+                <div class="quiz-option">
+                  <input type="radio" id="q2c" name="pregunta2" value="correcta">
+                  <label for="q2c">cat ~/.ssh/id_rsa.pub</label>
+                </div>
+              </div>
+              <div class="quiz-feedback" id="feedback2"></div>
+            </div>
+
+            <!-- Pregunta 3 -->
+            <div class="quiz-question">
+              <p><strong>3. ¿Por qué SSH es más seguro que HTTPS para clonación?</strong></p>
+              <div class="quiz-options">
+                <div class="quiz-option">
+                  <input type="radio" id="q3a" name="pregunta3" value="incorrecta">
+                  <label for="q3a">Solo usa una contraseña cifrada</label>
+                </div>
+                <div class="quiz-option">
+                  <input type="radio" id="q3b" name="pregunta3" value="correcta">
+                  <label for="q3b">Se basa en un par de llaves criptográficas robustas, eliminando la necesidad de contraseñas repetidas</label>
+                </div>
+                <div class="quiz-option">
+                  <input type="radio" id="q3c" name="pregunta3" value="incorrecta">
+                  <label for="q3c">La conexión HTTPS está desactualizada</label>
+                </div>
+              </div>
+              <div class="quiz-feedback" id="feedback3"></div>
+            </div>
+
+            <button type="button" class="quiz-btn" onclick="verificarRespuestas()">✓ Verificar Respuestas</button>
+            <div class="quiz-result" id="quizResult"></div>
+          </form>
+        </div>
+      </aside>
+    </main>
+
+    <footer>
+      Creado por: {% for nombre in autores %}{{ nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}
+    </footer>
+  </div>
+
+  <script>
+    function verificarRespuestas() {
+      // Definir respuestas correctas
+      const respuestasCorrectas = {
+        'pregunta1': 'correcta',  // q1b
+        'pregunta2': 'correcta',  // q2c
+        'pregunta3': 'correcta'   // q3b
+      };
+
+      let puntuacion = 0;
+      let totalPreguntas = 3;
+
+      // Iterar sobre cada pregunta
+      for (let i = 1; i <= totalPreguntas; i++) {
+        const nombrePregunta = 'pregunta' + i;
+        const respuestaSeleccionada = document.querySelector('input[name="' + nombrePregunta + '"]:checked');
+        const feedbackDiv = document.getElementById('feedback' + i);
+
+        // Limpiar feedback anterior
+        feedbackDiv.textContent = '';
+        feedbackDiv.className = 'quiz-feedback';
+
+        if (!respuestaSeleccionada) {
+          // No se seleccionó respuesta
+          feedbackDiv.textContent = '⚠️ Selecciona una opción';
+          feedbackDiv.classList.add('incorrecta');
+        } else {
+          const valorRespuesta = respuestaSeleccionada.value;
+
+          if (valorRespuesta === respuestasCorrectas[nombrePregunta]) {
+            // Respuesta correcta
+            feedbackDiv.textContent = '✓ ¡Correcto!';
+            feedbackDiv.classList.add('correcta');
+            puntuacion++;
+          } else {
+            // Respuesta incorrecta
+            feedbackDiv.textContent = '✗ Incorrecta. La respuesta correcta es: ' + 
+              document.querySelector('input[name="' + nombrePregunta + '"][value="correcta"]').nextElementSibling.textContent;
+            feedbackDiv.classList.add('incorrecta');
+          }
+        }
+      }
+
+      // Mostrar resultado final
+      const resultDiv = document.getElementById('quizResult');
+      const porcentaje = Math.round((puntuacion / totalPreguntas) * 100);
+      let mensaje = '';
+
+      if (puntuacion === totalPreguntas) {
+        mensaje = `🎉 ¡Excelente! Respondiste correctamente todas las preguntas (${puntuacion}/${totalPreguntas})`;
+      } else if (puntuacion >= 2) {
+        mensaje = `👍 ¡Buen desempeño! Acertaste ${puntuacion} de ${totalPreguntas} preguntas (${porcentaje}%)`;
+      } else {
+        mensaje = `📚 Necesitas repasar. Acertaste ${puntuacion} de ${totalPreguntas} preguntas (${porcentaje}%)`;
+      }
+
+      resultDiv.textContent = mensaje;
+      resultDiv.classList.add('show');
+    }
+
+    // Limpiar feedback cuando se selecciona una nueva opción
+    document.querySelectorAll('input[type="radio"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        const preguntaNum = this.name.replace('pregunta', '');
+        const feedbackDiv = document.getElementById('feedback' + preguntaNum);
+        if (feedbackDiv) {
+          feedbackDiv.textContent = '';
+          feedbackDiv.className = 'quiz-feedback';
+        }
+      });
+    });
+  </script>
+</body>
+</html>
