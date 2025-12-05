@@ -20,7 +20,6 @@ def kit_ssh(request):
 		'link_presentacion_slides': 'https://docs.google.com/presentation/d/1xrXEY4SHJe6zTd8VLGF8RuvwDr2K4pZ9/preview',
 		# Video de YouTube: extraer ID del enlace y usar en URL embed
 		# Link: https://www.youtube.com/watch?v=R2PzogOGavs → ID: R2PzogOGavs
-		'url_video_embed': 'https://www.youtube.com/embed/R2PzogOGavs?rel=0',
-		'autores': ['Perla, Miguel, Hannah, Fernanda, Mario y Darely'],
+		'url_video_embed': 'https://youtu.be/o1oWYW0BSq0?si=7BGT_qrUoxPhcVZf',
 	}
 	return render(request, 'kit_ssh.html', context)
